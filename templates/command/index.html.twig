@@ -1,0 +1,10 @@
+{% extends "base.html.twig" %}
+
+
+{% block body %}
+{% for command in commands %}
+    <p>{{ command.client_fullname }}</p>
+    <p>{{ command.state }}</p>
+{% endfor %}
+
+{% endblock %}

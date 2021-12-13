@@ -19,11 +19,13 @@ class CommandController extends AbstractController
     #[Route('/commands/{id_sate}', name: 'commands')]
     public function getAll(int $id_state, ManagerRegistry $doctrine): Response
     {
+
+        dd($id_state);
         $entityManager = $doctrine->getManager();
 
         $commands = $entityManager->getRepository(Command::class)->findBy(array('state' => $id_state));
 
-        return $this->render('commands/index.html.twig', [
+        return $this->render('command/index.html.twig', [
             'commands' => $commands,
         ]);
     }
@@ -45,7 +47,7 @@ class CommandController extends AbstractController
 
             if ($form->isSubmitted() && $form->isValid()) {
 
-                $company = $entityManager->getRepository(Compagny::class)->find(1)->getName() + " " + $entityManager->getRepository(Compagny::class)->find(1)->getAddress();
+                $company = "McDo 65 rue de la gare";
                 $references = 'IZUDHGZ667D8Z9F0';
                 $invoice->setReference($references);
                 $invoice->setClientInformations($form->get('client_fullname')->getData());
@@ -56,9 +58,12 @@ class CommandController extends AbstractController
                     $invoiceRow->setInvoice($invoice);
                     $invoiceRow->setName($form->get('products')[$key]->getData()->getName());
                     $invoiceRow->setPrice($form->get('products')[$key]->getData()->getPrice());
+                    $invoice->addInvoiceRow($invoiceRow);
                 }
 
                 $command->setState(1);
+
+                $entityManager->persist($invoice);
                 $entityManager->persist($command);
                 $entityManager->flush();
 
@@ -66,8 +71,8 @@ class CommandController extends AbstractController
             }
 
         }
-        return $this->renderForm('form',[
-            'form' => $form->createView(),
+        return $this->renderForm('command/create.html.twig',[
+            'form' => $form,
         ]);
     }
 
@@ -83,7 +88,7 @@ class CommandController extends AbstractController
         if (!$command) {
             return $this->redirectToRoute('commands',['state'=> 1]);
         }
-        return $this->render('page',[
+        return $this->render('command/show_command.html.twig',[
             'command' => $command,
         ]);
     }
@@ -93,6 +98,8 @@ class CommandController extends AbstractController
     public function edit(int $id_command, Request $request, ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();
+
+        $invoice = new Invoice();
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
 
@@ -106,14 +113,29 @@ class CommandController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            $company = "McDo 65 rue de la gare";
+            $references = 'IZUDHGZ667D8Z9F0';
+            $invoice->setReference($references);
+            $invoice->setClientInformations($form->get('client_fullname')->getData());
+            $invoice->setCompagnyInformations($company);
+
+            foreach ($form->get('products') as $key => $value) {
+                $invoiceRow = new InvoiceRow();
+                $invoiceRow->setInvoice($invoice);
+                $invoiceRow->setName($form->get('products')[$key]->getData()->getName());
+                $invoiceRow->setPrice($form->get('products')[$key]->getData()->getPrice());
+                $invoice->addInvoiceRow($invoiceRow);
+            }
+
+            $entityManager->persist($invoice);
             $entityManager->flush();
 
             return $this->redirectToRoute('command_show', ['id' => $command->getId()]);
         }
 
-        return $this->render('commands/edit.html.twig', [
+        return $this->renderForm('command/edit.html.twig', [
             'command' => $command,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

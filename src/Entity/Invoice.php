@@ -40,7 +40,7 @@ class Invoice
     private $compagny_informations;
 
     /**
-     * @ORM\OneToMany(targetEntity=InvoiceRow::class, mappedBy="invoice")
+     * @ORM\OneToMany(targetEntity=InvoiceRow::class, mappedBy="invoice",cascade={"persist"})
      */
     private $invoiceRows;
 

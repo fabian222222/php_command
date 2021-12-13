@@ -13,7 +13,6 @@ class BillChecker extends Command
 {
     protected static $defaultName = 'app:check-bill';
     public function __construct(
-        UserPasswordHasherInterface $passwordInter,
         EntityManagerInterface $em
     ){
         $this->em = $em;
