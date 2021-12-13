@@ -45,7 +45,7 @@ class Command
     private $limit_date;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Product::class, mappedBy="command")
+     * @ORM\ManyToMany(targetEntity=Product::class, mappedBy="command",cascade={"persist"})
      */
     private $products;
 

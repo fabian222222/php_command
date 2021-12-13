@@ -30,7 +30,7 @@ class Product
     private $price;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Command::class, inversedBy="products")
+     * @ORM\ManyToMany(targetEntity=Command::class, inversedBy="products", cascade={"persist"})
      */
     private $command;
 

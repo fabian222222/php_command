@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\Command;
 use Symfony\Component\Form\AbstractType;
+use App\Form\ProductFormType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,7 +18,12 @@ class CommandFormType extends AbstractType
             ->add('address')
             ->add('phone')
             ->add('limit_date')
-            ->add('products')
+            ->add('products', CollectionType::class, [
+                'entry_type' => ProductFormType::class,
+                'entry_options' => ['label' => false],
+                'allow_add' => true,
+                'by_reference' => false,
+            ]);
         ;
     }
 

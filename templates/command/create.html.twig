@@ -1,0 +1,49 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+{{ form_start(form) }}
+    {{form_row(form.client_fullname)}}
+    {{form_row(form.address)}}
+    {{form_row(form.phone)}}
+    {{form_row(form.limit_date)}}
+
+
+
+    <button type="button" class="add_item_link" data-collection-holder-class="products">Add a product</button>
+    <ul class="products" data-index="{{ form.products|length > 0 ? form.products|last.vars.name + 1 : 0 }}" data-prototype="{{ form_widget(form.products.vars.prototype)|e('html_attr') }}"></ul>
+    <button type="submit">Add this command</button>
+{{ form_end(form) }}
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script>
+    window.addEventListener('DOMContentLoaded', ()=>{
+
+        const addFormToCollection = (e) => {
+            const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
+            console.log("'rtk");
+            const item = document.createElement('li');
+
+            item.innerHTML = collectionHolder
+                .dataset
+                .prototype
+                .replace(
+                /__name__/g,
+                collectionHolder.dataset.index
+                );
+
+            collectionHolder.appendChild(item);
+
+            collectionHolder.dataset.index++;
+        };
+
+            document
+        .querySelectorAll('.add_item_link')
+        .forEach(btn => btn.addEventListener("click", addFormToCollection));
+    })
+
+</script>
+{% endblock %}
