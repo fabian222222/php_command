@@ -47,6 +47,7 @@ class Invoice
     public function __construct()
     {
         $this->invoiceRows = new ArrayCollection();
+        $this->creation_date = new \DateTimeImmutable('now');
     }
 
     public function getId(): ?int
