@@ -9,20 +9,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CommandRepository;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
-class BillChecker extends Command
+class Expired extends Command
 {
-    protected static $defaultName = 'app:check-bill';
+    protected static $defaultName = 'app:expired';
     public function __construct(
         EntityManagerInterface $em,
-        CommandRepository $command_repo,
-        MailerInterface $mailer
+        CommandRepository $command_repo
     ){
         $this->em = $em;
         $this->command_repo = $command_repo;
-        $this->mailer = $mailer;
 
         parent::__construct();
     }
@@ -30,25 +26,16 @@ class BillChecker extends Command
     protected function configure(): void
     {
         $this
-        ->setHelp('This command allows you to check all bils');
+        ->setHelp('This command allows you to check all bils date');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $today = date("Y-m-d H:i:s"); 
 
-        $commands = $this->command_repo->findUncheckInvoice();
+        $commands = $this->command_repo->checkExpired($today);
         foreach ($commands as $command) {
-
-            $email = (new Email())
-            ->from('fabianzuo@gmail.com')
-            ->to('fabianzuo@gmail.com')
-            ->subject('Time for Symfony Mailer!')
-            ->text('Sending emails is fun again!')
-            ->html('<p>See Twig integration for better HTML ' . $command->getClientFullname() . ' ! </p>');
-
-            $this->mailer->send($email);
-
-            $command->setPayCheck(1);
+            $command->setState("retard");
             $this->em->persist($command);
             $this->em->flush();
 

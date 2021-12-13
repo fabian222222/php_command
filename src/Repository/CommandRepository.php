@@ -19,32 +19,23 @@ class CommandRepository extends ServiceEntityRepository
         parent::__construct($registry, Command::class);
     }
 
-    // /**
-    //  * @return Command[] Returns an array of Command objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findUncheckInvoice()
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
+        return $this->createQueryBuilder('command')
+            ->andWhere("command.state = 'payée'")
+            ->andWhere("command.pay_check = 0")
             ->getQuery()
             ->getResult()
         ;
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Command
+    public function checkExpired($today)
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
+        return $this->createQueryBuilder('command')
+            ->andWhere("command.limit_date < :today")
+            ->setParameter('today', $today)
             ->getQuery()
-            ->getOneOrNullResult()
+            ->getResult()
         ;
     }
-    */
 }

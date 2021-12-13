@@ -49,6 +49,11 @@ class Command
      */
     private $products;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $pay_check;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -142,6 +147,18 @@ class Command
         if ($this->products->removeElement($product)) {
             $product->removeCommand($this);
         }
+
+        return $this;
+    }
+
+    public function getPayCheck(): ?bool
+    {
+        return $this->pay_check;
+    }
+
+    public function setPayCheck(bool $pay_check): self
+    {
+        $this->pay_check = $pay_check;
 
         return $this;
     }
