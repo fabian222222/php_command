@@ -2,9 +2,21 @@
 
 
 {% block body %}
+<h1>{{title}}</h1>
 {% for command in commands %}
-    <p>{{ command.client_fullname }}</p>
-    <p>{{ command.state }}</p>
+    <p>{{command.clientFullname}}</p>
+    <p>{{command.address}}</p>
+    <p>{{command.phone}}</p>
+    <p>{{command.state}}</p>
+    <p>{{command.limitDate|date("Y-m-d")}}</p>
+    <p>{{command.payCheck}}</p>
+    {% if command.state == "non traitée" %}
+        <a href="{{path("command_edit_state", {id_command: command.id, id_state: 2})}}">passer la commande en traitée</a>
+    {% elseif command.state == "traitée" %}
+        <a href="{{path("command_edit_state", {id_command: command.id, id_state: 3})}}"></a>
+    {% elseif command.state == "traitée" %}
+        <a href="{{path("command_edit_state", {id_command: command.id, id_state: 4})}}"></a>
+    {% endif %}
 {% endfor %}
 
 {% endblock %}

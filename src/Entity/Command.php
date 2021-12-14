@@ -57,6 +57,7 @@ class Command
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->pay_check = 0;
     }
 
     public function getId(): ?int

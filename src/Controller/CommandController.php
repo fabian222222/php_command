@@ -12,21 +12,43 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use App\Service\Mailer\MailerManager;
 
 class CommandController extends AbstractController
 {
     // get all commands by a state
-    #[Route('/commands/{id_sate}', name: 'commands')]
+    #[Route('/commands/{id_state}', name: 'commands')]
     public function getAll(int $id_state, ManagerRegistry $doctrine): Response
     {
 
-        dd($id_state);
+        switch ($id_state){
+            case 1 :
+                $state = "non traitée";
+                $title = "Commandes non traitées";
+                break;
+            case 2 :
+                $state = "traitée";
+                $title = "Commandes traitées";
+                break;
+            case 3 :
+                $state = "payée";
+                $title = "Commandes payées";
+                break;
+            case 4 :
+                $state = "retard";
+                $title = "Commandes en retard";
+                break;
+        }
+
         $entityManager = $doctrine->getManager();
 
-        $commands = $entityManager->getRepository(Command::class)->findBy(array('state' => $id_state));
-
+        $commands = $entityManager->getRepository(Command::class)->findByState($state);
+        
         return $this->render('command/index.html.twig', [
             'commands' => $commands,
+            'title' => $title
         ]);
     }
 
@@ -61,23 +83,25 @@ class CommandController extends AbstractController
                     $invoice->addInvoiceRow($invoiceRow);
                 }
 
-                $command->setState(1);
+                $command->setState("non traitée");
 
                 $entityManager->persist($invoice);
                 $entityManager->persist($command);
                 $entityManager->flush();
 
-                return $this->redirectToRoute('command_show', ['id' => $command->getId()]);
+                return $this->redirectToRoute('command_show', ['id_command' => $command->getId()]);
             }
 
-        }
-        return $this->renderForm('command/create.html.twig',[
-            'form' => $form,
-        ]);
+            return $this->renderForm('command/create.html.twig',[
+                'form' => $form,
+            ]);
+
+        } 
+        return $this->redirectToRoute('login');
     }
 
     //show a command
-    #[Route('/command/show/{id}', name: 'command_show')]
+    #[Route('/command/show/{id_command}', name: 'command_show')]
     public function show(int $id_command, ManagerRegistry $doctrine): Response
     {
 
@@ -141,15 +165,43 @@ class CommandController extends AbstractController
 
     //edit state of a command
     #[Route('/command/{id_command}/edit/state/{id_state}', name: 'command_edit_state')]
-    public function editState(int $id_command,int $id_state, Request $request, ManagerRegistry $doctrine): void
+    public function editState(
+        int $id_command,
+        int $id_state, 
+        Request $request, 
+        ManagerRegistry $doctrine,
+        MailerInterface $mailerInterface
+        ):Response
     {
+
         $entityManager = $doctrine->getManager();
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
 
+        switch ($id_state){
+            case 2 :
+
+                $state = "traitée";
+                $mailer = new MailerManager($mailerInterface);
+                $subject = "You command is now treated !";
+                $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
+                $mailer->sendMail($subject, $content);
+                break;
+                
+            case 3 :
+                $state = "payée";
+                break;
+            case 4 :
+                $state = "retard";
+                break;
+        }
         if ($command) {
-            $command->setState($id_state);
+            $command->setState($state);
             $entityManager->flush();
         }
+
+        return $this->redirectToRoute('commands', [
+            "id_state" => $id_state - 1
+        ]);
     }
 }

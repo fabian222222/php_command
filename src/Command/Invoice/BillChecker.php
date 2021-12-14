@@ -12,6 +12,8 @@ use App\Repository\CommandRepository;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
+use App\Service\Mailer\MailerManager;
+
 class BillChecker extends Command
 {
     protected static $defaultName = 'app:check-bill';
@@ -22,7 +24,7 @@ class BillChecker extends Command
     ){
         $this->em = $em;
         $this->command_repo = $command_repo;
-        $this->mailer = $mailer;
+        $this->mailerInterface = $mailer;
 
         parent::__construct();
     }
@@ -30,23 +32,21 @@ class BillChecker extends Command
     protected function configure(): void
     {
         $this
-        ->setHelp('This command allows you to check all bils');
+        ->setHelp('This command allows you to check all bills');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
 
         $commands = $this->command_repo->findUncheckInvoice();
+        $mailer = new MailerManager($this->mailerInterface);
+        
         foreach ($commands as $command) {
+            
+            $subject = "You command is now payed !";
+            $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
 
-            $email = (new Email())
-            ->from('fabianzuo@gmail.com')
-            ->to('fabianzuo@gmail.com')
-            ->subject('Time for Symfony Mailer!')
-            ->text('Sending emails is fun again!')
-            ->html('<p>See Twig integration for better HTML ' . $command->getClientFullname() . ' ! </p>');
-
-            $this->mailer->send($email);
+            $mailer->sendMail($subject, $content);
 
             $command->setPayCheck(1);
             $this->em->persist($command);
