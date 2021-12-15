@@ -16,6 +16,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Service\Mailer\MailerManager;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Dompdf\Css\Style;
+use Dompdf\Css\Stylesheet;
+use Dompdf\Tests\TestCase;
 
 class CommandController extends AbstractController
 {
@@ -63,13 +68,20 @@ class CommandController extends AbstractController
 
             $command = new Command();
             $invoice = new Invoice();
+            $pdfOptions = new Options();
+
+            $pdfOptions->set('defaultFont', 'Arial');
+            $dompdf = new Dompdf($pdfOptions);
+            $sheet = new Stylesheet($dompdf);
+            $s = new Style($sheet);
+            
 
             $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-
+                $tot_command = 0;
                 $company = "McDo 65 rue de la gare";
                 $references = 'IZUDHGZ667D8Z9F0';
                 $invoice->setReference($references);
@@ -82,10 +94,26 @@ class CommandController extends AbstractController
                     $invoiceRow->setName($form->get('products')[$key]->getData()->getName());
                     $invoiceRow->setPrice($form->get('products')[$key]->getData()->getPrice());
                     $invoice->addInvoiceRow($invoiceRow);
+                    $tot_command += intval($form->get('products')[$key]->getData()->getPrice());
                 }
 
-                $command->setState("non traitée");
+                $html = $this->render('invoice/invoice_template.html.twig', [
+                    'invoice' => $invoice,
+                    'tot_command' => $tot_command
+                ]);
 
+                $publicDirectory = $this->getParameter('kernel.project_dir').'/public/';
+                $pdfFilePath = $publicDirectory . '/pdf/' . $references . '.pdf';
+
+                $dompdf->load_html($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $output = $dompdf->output();            
+                
+                file_put_contents($pdfFilePath, $output);
+                dd($pdfFilePath);
+                $command->setState("non traitée");
+                
                 $entityManager->persist($invoice);
                 $entityManager->persist($command);
                 $entityManager->flush();
