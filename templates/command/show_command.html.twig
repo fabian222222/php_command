@@ -3,13 +3,20 @@
 
 {% block body %}
 
-<h2>Page d'une commande </h2>
-<p>{{ command.clientFullname }}</p>
-<p>{{ command.state }}</p>
+<div style="padding : 10px 20px">
+    <h2>Page d'une commande </h2>
 
-{% for pay in payed %}
-    <p>{{pay.type}}</p>
-    <p>{{pay.amount}}</p>
-{% endfor %}
+    <div class="card" style="padding:10px 20px">
+        <p style="margin:0; padding:0;">Nom du client : {{ command.clientFullname }}</p>
+        <p style="margin:0; padding:0;">Statut de la commande : {{ command.state }}</p>
+    </div>
+    <h3 style="padding:20px 0">Tous les payements effectue :</h3>
+    {% for pay in payed %}
+        <div class="card" style="display:flex; justify-content:space-between; flex-direction:row; padding:10px; margin-bottom: 10px">
+            <p style="padding:0; margin:0">{{pay.type}}</p>
+            <p style="padding:0; margin:0">{{pay.amount}}</p>
+        </div>
+    {% endfor %}
+</div>
 
 {% endblock %}

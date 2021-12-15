@@ -64,7 +64,7 @@ class CommandController extends AbstractController
             $command = new Command();
             $invoice = new Invoice();
 
-            $form = $this->createForm(CommandFormType::class, $command);
+            $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
             $form->handleRequest($request);
 
