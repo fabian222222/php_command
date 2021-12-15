@@ -7,4 +7,9 @@
 <p>{{ command.clientFullname }}</p>
 <p>{{ command.state }}</p>
 
+{% for pay in payed %}
+    <p>{{pay.type}}</p>
+    <p>{{pay.amount}}</p>
+{% endfor %}
+
 {% endblock %}

@@ -6,6 +6,7 @@ use App\Entity\Command;
 use App\Entity\Compagny;
 use App\Entity\Invoice;
 use App\Entity\InvoiceRow;
+use App\Repository\PaymentRepository;
 use App\Form\CommandFormType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -130,18 +131,20 @@ class CommandController extends AbstractController
 
     //show a command
     #[Route('/command/show/{id_command}', name: 'command_show')]
-    public function show(int $id_command, ManagerRegistry $doctrine): Response
+    public function show(int $id_command, ManagerRegistry $doctrine, PaymentRepository $payment_repo): Response
     {
 
         $entityManager = $doctrine->getManager();
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
+        $payedPrice = $payment_repo->findBy(["id_command" => $id_command]);
 
         if (!$command) {
             return $this->redirectToRoute('commands',['state'=> 1]);
         }
         return $this->render('command/show_command.html.twig',[
             'command' => $command,
+            'payed' => $payedPrice
         ]);
     }
 
