@@ -2,18 +2,18 @@
 
 {% block body %}
 
-{{ form_start(form) }}
-    {{form_row(form.client_fullname)}}
-    {{form_row(form.address)}}
-    {{form_row(form.phone)}}
-    {{form_row(form.limit_date)}}
+<div style="padding: 20px">
+    {{ form_start(form) }}
+        {{form_row(form.client_fullname, {"attr": {"class" : "form-control"}})}}
+        {{form_row(form.address, {"attr": {"class" : "form-control"}})}}
+        {{form_row(form.phone, {"attr": {"class" : "form-control"}})}}
+        {{form_row(form.limit_date)}}
 
-
-
-    <button type="button" class="add_item_link" data-collection-holder-class="products">Add a product</button>
-    <ul class="products" data-index="{{ form.products|length > 0 ? form.products|last.vars.name + 1 : 0 }}" data-prototype="{{ form_widget(form.products.vars.prototype)|e('html_attr') }}"></ul>
-    <button type="submit">Add this command</button>
-{{ form_end(form) }}
+        <button style="margin-top: 20px" type="button" class="add_item_link btn btn-primary" data-collection-holder-class="products">Add a product</button>
+        <ul class="products" data-index="{{ form.products|length > 0 ? form.products|last.vars.name + 1 : 0 }}" data-prototype="{{ form_widget(form.products.vars.prototype)|e('html_attr') }}"></ul>
+        <button class="btn btn-primary" type="submit">Add this command</button>
+    {{ form_end(form) }}
+</div>
 
 {% endblock %}
 

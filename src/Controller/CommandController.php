@@ -76,7 +76,7 @@ class CommandController extends AbstractController
             $s = new Style($sheet);
             
 
-            $form = $this->createForm(CommandFormType::class, $command);
+            $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
             $form->handleRequest($request);
 

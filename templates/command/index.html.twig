@@ -2,21 +2,24 @@
 
 
 {% block body %}
-<h1>{{title}}</h1>
-{% for command in commands %}
-    <p>{{command.clientFullname}}</p>
-    <p>{{command.address}}</p>
-    <p>{{command.phone}}</p>
-    <p>{{command.state}}</p>
-    <p>{{command.limitDate|date("Y-m-d")}}</p>
-    <p>{{command.payCheck}}</p>
-    {% if command.state == "non traitée" %}
-        <a href="{{path("command_edit_state", {id_command: command.id, id_state: 2})}}">passer la commande en traitée</a>
-    {% elseif command.state == "traitée" %}
-        <a href="{{path("command_edit_state", {id_command: command.id, id_state: 3})}}"></a>
-    {% elseif command.state == "traitée" %}
-        <a href="{{path("command_edit_state", {id_command: command.id, id_state: 4})}}"></a>
-    {% endif %}
-{% endfor %}
+<div style="padding: 20px">
+    <h1>{{title}}</h1>
+    {% for command in commands %}
+    <div style="padding:10px" class="card">
+        <p style="margin:0; padding:0">Nom du client : {{command.clientFullname}}</p>
+        <p style="margin:0; padding:0">Adresse du client : {{command.address}}</p>
+        <p style="margin:0; padding:0">Téléphone du client :{{command.phone}}</p>
+        <p style="margin:0; padding:0">État de la commande : {{command.state}}</p>
+        <p style="margin:0; padding:0">Date limite pour le payement : {{command.limitDate|date("Y-m-d")}}</p>
+        {% if command.state == "non traitée" %}
+            <a class="btn btn-primary" href="{{path("command_edit_state", {id_command: command.id, id_state: 2})}}">passer la commande en traitée</a>
+        {% elseif command.state == "traitée" %}
+            <a class="btn btn-primary" href="{{path("payment_create", {id_command: command.id})}}">Payer</a>
+        {% elseif command.state == "retard" %}
+            <a class="btn btn-primary" href="{{path("command_edit_state", {id_command: command.id, id_state: 4})}}">Retard</a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
 
 {% endblock %}
