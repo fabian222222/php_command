@@ -1,0 +1,12 @@
+<div>
+    {% if user != null %}
+        <p>{{ compagny.name }}</p>
+        <a href="{{ path('commands', {id_state: 1}) }}">Commandes non traitée</a>
+        <a href="{{ path('commands', {id_state: 2}) }}">Commandes traitée</a>
+        <a href="{{ path('commands', {id_state: 3}) }}">Commandes payée</a>
+        <a href="{{ path('commands', {id_state: 4}) }}">Commandes en retard</a>
+        <a href="{{ path('logout')}}">Logout</a>
+    {% else %}
+        <a href="{{ path('login')}}">Login</a>
+    {% endif %}
+</div>

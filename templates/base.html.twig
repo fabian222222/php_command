@@ -14,6 +14,11 @@
         {% endblock %}
     </head>
     <body style="box-sizing: border-box;">
+        <div id="sidebar">
+            {{ render(controller(
+                'App\\Controller\\HeaderController::getNavData'
+            )) }}
+        </div>
         {% block body %}{% endblock %}
     </body>
 </html>
