@@ -73,6 +73,7 @@ class CommandController extends AbstractController
             $pdfOptions->set('defaultFont', 'Arial');
             $pdfOptions->set('isRemoteEnabled',true);   
             $dompdf = new Dompdf($pdfOptions);
+            
             $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
             $form->handleRequest($request);
@@ -186,6 +187,7 @@ class CommandController extends AbstractController
             $tot_command = 0;
             $company = "McDo 65 rue de la gare";
             $references = $referenceGenerator->generate();
+            $command->setLastInvoice($references);
             $invoice->setReference($references);
             $invoice->setClientInformations($form->get('client_fullname')->getData());
             $invoice->setCompagnyInformations($company);

@@ -46,7 +46,9 @@ class BillChecker extends Command
             $subject = "You command is now payed !";
             $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
 
-            $mailer->sendMail($subject, $content);
+            $reference = $command->getLastInvoice();
+            
+            $mailer->sendMail($subject, $content, "");
 
             $command->setPayCheck(1);
             $this->em->persist($command);
