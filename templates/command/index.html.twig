@@ -5,7 +5,7 @@
 <div style="padding: 20px">
     <h1>{{title}}</h1>
     {% for command in commands %}
-    <div style="padding:10px" class="card">
+    <div  class="card" style="padding:10px;cursor: pointer; margin:10px 0;" onclick="window.location.href = '{{ path('command_show',{id_command:command.id}) }}'">
         <p style="margin:0; padding:0">Nom du client : {{command.clientFullname}}</p>
         <p style="margin:0; padding:0">Adresse du client : {{command.address}}</p>
         <p style="margin:0; padding:0">Téléphone du client :{{command.phone}}</p>

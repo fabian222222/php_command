@@ -16,11 +16,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Service\Mailer\MailerManager;
+use App\Service\Reference\ReferenceGenerator;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Dompdf\Css\Style;
-use Dompdf\Css\Stylesheet;
-use Dompdf\Tests\TestCase;
 
 class CommandController extends AbstractController
 {
@@ -60,7 +58,7 @@ class CommandController extends AbstractController
 
     //create a command
     #[Route('/command/create', name: 'command_create')]
-    public function create(Request $request, ManagerRegistry $doctrine): Response
+    public function create(Request $request, ManagerRegistry $doctrine, ReferenceGenerator $referenceGenerator): Response
     {
         if ($this->getUser() != null){
 
@@ -68,22 +66,21 @@ class CommandController extends AbstractController
 
             $command = new Command();
             $invoice = new Invoice();
+            $payment = [];
             $pdfOptions = new Options();
 
             $pdfOptions->set('defaultFont', 'Arial');
             $dompdf = new Dompdf($pdfOptions);
-            $sheet = new Stylesheet($dompdf);
-            $s = new Style($sheet);
-            
 
             $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
+
                 $tot_command = 0;
                 $company = "McDo 65 rue de la gare";
-                $references = 'IZUDHGZ667D8Z9F0';
+                $references = $referenceGenerator->generate();
                 $invoice->setReference($references);
                 $invoice->setClientInformations($form->get('client_fullname')->getData());
                 $invoice->setCompagnyInformations($company);
@@ -150,11 +147,16 @@ class CommandController extends AbstractController
 
     //edit a command
     #[Route('/command/{id_command}/edit', name: 'command_edit')]
-    public function edit(int $id_command, Request $request, ManagerRegistry $doctrine): Response
+    public function edit(int $id_command, Request $request,PaymentRepository $paymentManager, ManagerRegistry $doctrine, ReferenceGenerator $referenceGenerator): Response
     {
         $entityManager = $doctrine->getManager();
 
         $invoice = new Invoice();
+        $payment = $paymentManager->findBy(["id_command" => $id_command]);
+        $pdfOptions = new Options();
+
+        $pdfOptions->set('defaultFont', 'Arial');
+        $dompdf = new Dompdf($pdfOptions);
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
 
@@ -167,9 +169,9 @@ class CommandController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            $tot_command = 0;
             $company = "McDo 65 rue de la gare";
-            $references = 'IZUDHGZ667D8Z9F0';
+            $references = $referenceGenerator->generate();
             $invoice->setReference($references);
             $invoice->setClientInformations($form->get('client_fullname')->getData());
             $invoice->setCompagnyInformations($company);
@@ -180,8 +182,24 @@ class CommandController extends AbstractController
                 $invoiceRow->setName($form->get('products')[$key]->getData()->getName());
                 $invoiceRow->setPrice($form->get('products')[$key]->getData()->getPrice());
                 $invoice->addInvoiceRow($invoiceRow);
+                $tot_command += intval($form->get('products')[$key]->getData()->getPrice());
             }
 
+            $html = $this->render('invoice/invoice_template.html.twig', [
+                'invoice' => $invoice,
+                'tot_command' => $tot_command,
+                'payment' => $payment
+            ]);
+            $publicDirectory = $this->getParameter('kernel.project_dir').'/public/';
+            $pdfFilePath = $publicDirectory . '/pdf/' . $references . '.pdf';
+
+            $dompdf->load_html($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $output = $dompdf->output();            
+            
+            file_put_contents($pdfFilePath, $output);
+            dd($pdfFilePath);
             $entityManager->persist($invoice);
             $entityManager->flush();
 
