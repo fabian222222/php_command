@@ -13,13 +13,14 @@ class MailerManager
         $this->mailer = $mailer;
     }
 
-    public function sendMail(string $subject, string $content)
+    public function sendMail(string $subject, string $content, string $pdf)
     {
         $email = (new Email())
         ->from('macdo@cool.com')
         ->to('macdo@cool.com')
         ->subject($subject)
-        ->html($content);
+        ->html($content)
+        ->attachFromPath($pdf);
 
         $this->mailer->send($email);
     }

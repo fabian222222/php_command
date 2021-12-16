@@ -60,7 +60,7 @@ class CommandController extends AbstractController
 
     //create a command
     #[Route('/command/create', name: 'command_create')]
-    public function create(Request $request, ManagerRegistry $doctrine): Response
+    public function create(Request $request, ManagerRegistry $doctrine, MailerInterface $mailerInterface): Response
     {
         if ($this->getUser() != null){
 
@@ -111,12 +111,17 @@ class CommandController extends AbstractController
                 $output = $dompdf->output();            
                 
                 file_put_contents($pdfFilePath, $output);
-                dd($pdfFilePath);
                 $command->setState("non traitée");
                 
                 $entityManager->persist($invoice);
                 $entityManager->persist($command);
                 $entityManager->flush();
+
+                $mailer = new MailerManager($mailerInterface);
+                $subject = "You command is created !";
+                $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
+                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $mailer->sendMail($subject, $content, $file);
 
                 return $this->redirectToRoute('command_show', ['id_command' => $command->getId()]);
             }
@@ -150,7 +155,7 @@ class CommandController extends AbstractController
 
     //edit a command
     #[Route('/command/{id_command}/edit', name: 'command_edit')]
-    public function edit(int $id_command, Request $request, ManagerRegistry $doctrine): Response
+    public function edit(int $id_command, Request $request, ManagerRegistry $doctrine, MailerInterface $mailerInterface): Response
     {
         $entityManager = $doctrine->getManager();
 
@@ -162,7 +167,7 @@ class CommandController extends AbstractController
             return $this->redirectToRoute('commands',['state'=> 1]);
         }
 
-        $form = $this->createForm(CommandFormType::class, $command);
+        $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
         $form->handleRequest($request);
 
@@ -185,7 +190,13 @@ class CommandController extends AbstractController
             $entityManager->persist($invoice);
             $entityManager->flush();
 
-            return $this->redirectToRoute('command_show', ['id' => $command->getId()]);
+            $mailer = new MailerManager($mailerInterface);
+            $subject = "You command is edited !";
+            $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
+            $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+            $mailer->sendMail($subject, $content, $file);
+
+            return $this->redirectToRoute('command_show', ['id_command' => $command->getId()]);
         }
 
         return $this->renderForm('command/edit.html.twig', [
@@ -216,13 +227,21 @@ class CommandController extends AbstractController
                 $mailer = new MailerManager($mailerInterface);
                 $subject = "You command is now treated !";
                 $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
-                $mailer->sendMail($subject, $content);
+                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $mailer->sendMail($subject, $content, $file);
                 break;
                 
             case 3 :
                 $state = "payée";
                 break;
             case 4 :
+
+                $state = "traitée";
+                $mailer = new MailerManager($mailerInterface);
+                $subject = "You command is now retarded !";
+                $content = "Fuck you " . $command->getClientFullname() . " for your trust !!";
+                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $mailer->sendMail($subject, $content, $file);
                 $state = "retard";
                 break;
         }
