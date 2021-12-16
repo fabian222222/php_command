@@ -6,6 +6,7 @@ use App\Entity\Product;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class ProductFormType extends AbstractType
 {
@@ -13,7 +14,9 @@ class ProductFormType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('price')
+            ->add('price', null, [
+                "constraints" => array(new Regex('[(\d)]'))
+            ])
         ;
     }
 

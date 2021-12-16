@@ -15,11 +15,13 @@
         {% endblock %}
     </head>
     <body style="box-sizing: border-box;">
+        {% if app.user is not null %}
         <div id="sidebar">
             {{ render(controller(
                 'App\\Controller\\HeaderController::getNavData'
             )) }}
         </div>
+        {% endif %}
         {% block body %}{% endblock %}
     </body>
 </html>

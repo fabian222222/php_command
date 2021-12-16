@@ -8,6 +8,7 @@ use App\Form\ProductFormType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class CommandFormType extends AbstractType
 {
@@ -16,7 +17,9 @@ class CommandFormType extends AbstractType
         $builder
             ->add('client_fullname')
             ->add('address')
-            ->add('phone')
+            ->add('phone', null, [
+                "constraints" => array(new Regex('[(\d)]'))
+            ])
             ->add('limit_date')
             ->add('products', CollectionType::class, [
                 'entry_type' => ProductFormType::class,

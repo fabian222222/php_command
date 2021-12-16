@@ -118,6 +118,9 @@
     "sabberworm/php-css-parser": {
         "version": "8.4.0"
     },
+    "symfony/asset": {
+        "version": "v6.0.1"
+    },
     "symfony/cache": {
         "version": "v6.0.1"
     },

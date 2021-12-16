@@ -10,6 +10,13 @@
         <p style="margin:0; padding:0;">Nom du client : {{ command.clientFullname }}</p>
         <p style="margin:0; padding:0;">Statut de la commande : {{ command.state }}</p>
     </div>
+    <h3>Tous les produits : </h3>
+    {% for product in products %}
+        <div class="card" style="display:flex; justify-content:space-between; flex-direction:row; padding:10px; margin-bottom: 10px">
+            <p style="padding:0; margin:0">nom du produit : {{product.name}}</p>
+            <p style="padding:0; margin:0">prix du produit : {{product.price}}</p>
+        </div>
+    {% endfor %}
     <h3 style="padding:20px 0">Tous les payements effectue :</h3>
     {% for pay in payed %}
         <div class="card" style="display:flex; justify-content:space-between; flex-direction:row; padding:10px; margin-bottom: 10px">

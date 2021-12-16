@@ -70,8 +70,8 @@ class CommandController extends AbstractController
             $pdfOptions = new Options();
 
             $pdfOptions->set('defaultFont', 'Arial');
+            $pdfOptions->set('isRemoteEnabled',true);   
             $dompdf = new Dompdf($pdfOptions);
-
             $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
 
             $form->handleRequest($request);
@@ -96,7 +96,8 @@ class CommandController extends AbstractController
 
                 $html = $this->render('invoice/invoice_template.html.twig', [
                     'invoice' => $invoice,
-                    'tot_command' => $tot_command
+                    'tot_command' => $tot_command,
+                    "payments" => []
                 ]);
 
                 $publicDirectory = $this->getParameter('kernel.project_dir').'/public/';
@@ -117,7 +118,7 @@ class CommandController extends AbstractController
                 $mailer = new MailerManager($mailerInterface);
                 $subject = "You command is created !";
                 $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
-                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $file = "pdf/$references.pdf";
                 $mailer->sendMail($subject, $content, $file);
 
                 return $this->redirectToRoute('command_show', ['id_command' => $command->getId()]);
@@ -139,6 +140,7 @@ class CommandController extends AbstractController
         $entityManager = $doctrine->getManager();
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
+        $products = $command->getProducts();
         $payedPrice = $payment_repo->findBy(["id_command" => $id_command]);
 
         if (!$command) {
@@ -146,7 +148,8 @@ class CommandController extends AbstractController
         }
         return $this->render('command/show_command.html.twig',[
             'command' => $command,
-            'payed' => $payedPrice
+            'payed' => $payedPrice,
+            'products' => $products
         ]);
     }
 
@@ -165,8 +168,12 @@ class CommandController extends AbstractController
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
 
+        if($command->getState() === "payée" || $command->getState() === "retard"){
+            return $this->redirectToRoute('commands', ["id_state"=>1]);
+        }
+
         if (!$command) {
-            return $this->redirectToRoute('commands',['state'=> 1]);
+            return $this->redirectToRoute('commands',['id_state'=> 1]);
         }
 
         $form = $this->createForm(CommandFormType::class, $command, ["attr" => ["class" => "form-group"]]);
@@ -193,7 +200,7 @@ class CommandController extends AbstractController
             $html = $this->render('invoice/invoice_template.html.twig', [
                 'invoice' => $invoice,
                 'tot_command' => $tot_command,
-                'payment' => $payment
+                'payments' => $payment
             ]);
             $publicDirectory = $this->getParameter('kernel.project_dir').'/public/';
             $pdfFilePath = $publicDirectory . '/pdf/' . $references . '.pdf';
@@ -204,14 +211,13 @@ class CommandController extends AbstractController
             $output = $dompdf->output();            
             
             file_put_contents($pdfFilePath, $output);
-            dd($pdfFilePath);
             $entityManager->persist($invoice);
             $entityManager->flush();
 
             $mailer = new MailerManager($mailerInterface);
             $subject = "You command is edited !";
             $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
-            $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+            $file = "pdf/$references.pdf";
             $mailer->sendMail($subject, $content, $file);
 
             return $this->redirectToRoute('command_show', ['id_command' => $command->getId()]);
@@ -257,7 +263,7 @@ class CommandController extends AbstractController
                 $state = "traitée";
                 $mailer = new MailerManager($mailerInterface);
                 $subject = "You command is now retarded !";
-                $content = "Fuck you " . $command->getClientFullname() . " for your trust !!";
+                $content = "We want to remind  you " . $command->getClientFullname() . " that your due time is expired !!";
                 $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
                 $mailer->sendMail($subject, $content, $file);
                 $state = "retard";
