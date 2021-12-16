@@ -1,6 +1,7 @@
 <div>
     {% if user != null %}
         <p>{{ compagny.name }}</p>
+        <a href="{{ path('command_create') }}">Créer une commande</a>
         <a href="{{ path('commands', {id_state: 1}) }}">Commandes non traitée</a>
         <a href="{{ path('commands', {id_state: 2}) }}">Commandes traitée</a>
         <a href="{{ path('commands', {id_state: 3}) }}">Commandes payée</a>
