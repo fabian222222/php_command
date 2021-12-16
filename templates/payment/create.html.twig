@@ -3,9 +3,11 @@
 {% block title %}Payment{% endblock %}
 
 {% block body %}
+<div style="padding:20px">
     {{ form_start(form) }}
-        {{ form_row(form.type) }}
-        {{ form_row(form.amount) }}
-        <button type="submit" class="btn">Register</button>
+        {{ form_row(form.type, {"attr" : {"class":"form-control"} }) }}
+        {{ form_row(form.amount, {"attr" : {"class" : "form-control"}}) }}
+        <button style='margin-top:10px' class="btn btn-primary" type="submit" class="btn">Register</button>
     {{ form_end(form) }}
+</div>
 {% endblock %}

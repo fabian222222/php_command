@@ -35,7 +35,7 @@ class CompanyController extends AbstractController
     {
         $company = $companyRepo->find($id);
 
-        $form = $this->createForm(CompanyFormType::class, $company);
+        $form = $this->createForm(CompanyFormType::class, $company, ["attr" => ["class" => "form-group"]]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             

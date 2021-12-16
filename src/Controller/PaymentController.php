@@ -11,6 +11,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Mailer\MailerInterface;
+use App\Service\Mailer\MailerManager;
 
 class PaymentController extends AbstractController
 {
@@ -21,7 +23,8 @@ class PaymentController extends AbstractController
         ManagerRegistry $doctrine, 
         Request $request,
         CommandRepository $command_repo,
-        PaymentRepository $payment_repo
+        PaymentRepository $payment_repo,
+        MailerInterface $mailerInterface
         ): Response
     {
 
@@ -29,7 +32,7 @@ class PaymentController extends AbstractController
 
         $payment = new Payment();
         
-        $form = $this->createForm(PaymentFormType::class, $payment);
+        $form = $this->createForm(PaymentFormType::class, $payment, ["attr" => ["class" => "form-group"]]);
         $payment->setIdCommand($id_command);
         
         $form->handleRequest($request);
@@ -49,6 +52,13 @@ class PaymentController extends AbstractController
             $payedPrice = array_sum($payedPrice);
 
             if($payedPrice >= $commandPrice){
+
+                $mailer = new MailerManager($mailerInterface);
+                $subject = "You command is now payed !";
+                $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
+                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $mailer->sendMail($subject, $content, $file);
+
                 return $this->redirectToRoute('command_edit_state', [
                     "id_command" => $id_command,
                     "id_state" => 3
