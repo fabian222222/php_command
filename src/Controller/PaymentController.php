@@ -43,6 +43,7 @@ class PaymentController extends AbstractController
             $entityManager->flush();
 
             $command = $command_repo->find($id_command);
+            $reference = $command->getLastInvoice();
             $commandPrice = $command->getProducts()->getValues();
             $commandPrice = array_map(fn($value)=>$value->getPrice(), $commandPrice);
             $commandPrice = array_sum($commandPrice);
@@ -56,7 +57,7 @@ class PaymentController extends AbstractController
                 $mailer = new MailerManager($mailerInterface);
                 $subject = "You command is now payed !";
                 $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
-                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $file = "pdf/$reference.pdf";
                 $mailer->sendMail($subject, $content, $file);
 
                 return $this->redirectToRoute('command_edit_state', [

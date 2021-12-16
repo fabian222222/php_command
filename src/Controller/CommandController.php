@@ -7,6 +7,7 @@ use App\Entity\Compagny;
 use App\Entity\Invoice;
 use App\Entity\InvoiceRow;
 use App\Repository\PaymentRepository;
+use App\Repository\InvoiceRepository;
 use App\Form\CommandFormType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -81,6 +82,7 @@ class CommandController extends AbstractController
                 $tot_command = 0;
                 $company = "McDo 65 rue de la gare";
                 $references = $referenceGenerator->generate();
+                $command->setLastInvoice($references);
                 $invoice->setReference($references);
                 $invoice->setClientInformations($form->get('client_fullname')->getData());
                 $invoice->setCompagnyInformations($company);
@@ -230,20 +232,21 @@ class CommandController extends AbstractController
     }
 
     //edit state of a command
-    #[Route('/command/{id_command}/edit/state/{id_state}', name: 'command_edit_state')]
+    #[Route('/command/{id_command}/edit/state/{id_state}/', name: 'command_edit_state')]
     public function editState(
         int $id_command,
         int $id_state, 
         Request $request, 
         ManagerRegistry $doctrine,
-        MailerInterface $mailerInterface
+        MailerInterface $mailerInterface,
+        ReferenceGenerator $referenceGenerator
         ):Response
     {
 
         $entityManager = $doctrine->getManager();
 
         $command = $entityManager->getRepository(Command::class)->find($id_command);
-
+        $references = $command->getLastInvoice();
         switch ($id_state){
             case 2 :
 
@@ -251,7 +254,7 @@ class CommandController extends AbstractController
                 $mailer = new MailerManager($mailerInterface);
                 $subject = "You command is now treated !";
                 $content = "Thank you " . $command->getClientFullname() . " for your trust !!";
-                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $file = "pdf/$references.pdf";
                 $mailer->sendMail($subject, $content, $file);
                 break;
                 
@@ -264,7 +267,7 @@ class CommandController extends AbstractController
                 $mailer = new MailerManager($mailerInterface);
                 $subject = "You command is now retarded !";
                 $content = "We want to remind  you " . $command->getClientFullname() . " that your due time is expired !!";
-                $file = "pdf/IZUDHGZ667D8Z9F0.pdf";
+                $file = "pdf/$references.pdf";
                 $mailer->sendMail($subject, $content, $file);
                 $state = "retard";
                 break;

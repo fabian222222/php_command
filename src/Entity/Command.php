@@ -54,6 +54,11 @@ class Command
      */
     private $pay_check;
 
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $last_invoice;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -160,6 +165,18 @@ class Command
     public function setPayCheck(bool $pay_check): self
     {
         $this->pay_check = $pay_check;
+
+        return $this;
+    }
+
+    public function getLastInvoice(): ?string
+    {
+        return $this->last_invoice;
+    }
+
+    public function setLastInvoice(?string $last_invoice): self
+    {
+        $this->last_invoice = $last_invoice;
 
         return $this;
     }
